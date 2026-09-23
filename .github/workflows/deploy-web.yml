@@ -1,0 +1,50 @@
+name: Deploy web to GitHub Pages
+
+# Phase 9: builds the static Next.js export and publishes it to GitHub Pages
+# on every push to main that touches the frontend. The live site lands at:
+# https://shahzaib371-ai.github.io/portfolio/
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/deploy-web.yml"
+
+permissions:
+  contents: write # peaceiris/actions-gh-pages pushes the built site to gh-pages
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        env:
+          # Project-page URL is username.github.io/portfolio, so assets and
+          # links are built under the /portfolio base path.
+          NEXT_BASE_PATH: /portfolio
+          # Build-time placeholders; public pages are fully static and make
+          # no network calls during the build.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+        run: npm run build --workspace=@portfolio/web
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: apps/web/out

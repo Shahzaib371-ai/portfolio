@@ -3,7 +3,8 @@
     "hono": "^4.0.0",
     "@portfolio/ai-agent": "^0.1.0",
     "@portfolio/github-sync": "^0.1.0",
-    "@supabase/supabase-js": "^2.44.0"
+    "@supabase/supabase-js": "^2.44.0",
+    "@vercel/functions": "^2.0.0"
   },
   "description": "Secure backend API: admin CRUD, GitHub webhooks, AI agent, visitor chat. Deployed to Vercel serverless.",
   "devDependencies": {
