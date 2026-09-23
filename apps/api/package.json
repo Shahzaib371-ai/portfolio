@@ -17,7 +17,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test $(find src -name '*.test.ts' | sort)"
+    "test": "tsx --test $(find src -name '*.test.ts' | sort)",
+    "build": "npm run build --workspace=@portfolio/github-sync --workspace=@portfolio/ai-agent"
   },
   "version": "0.1.0"
 }

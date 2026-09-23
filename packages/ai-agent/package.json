@@ -12,13 +12,14 @@
   "private": true,
   "scripts": {
     "analyze": "tsx src/run.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
   },
   "version": "0.1.0",
   "exports": {
-    ".": "./src/index.ts",
-    "./gemini": "./src/gemini.ts",
-    "./analyze": "./src/analyzeRepo.ts",
+    ".": "./dist/index.js",
+    "./gemini": "./dist/gemini.js",
+    "./analyze": "./dist/analyzeRepo.js",
     "./package.json": "./package.json"
   }
 }

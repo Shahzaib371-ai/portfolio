@@ -19,6 +19,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build workspace packages
+        # The API imports @portfolio/* packages; they compile to dist/ so the
+        # typechecker and tests resolve real JS + declarations (and so Vercel
+        # can bundle them — its Node runtime cannot load .ts from node_modules).
+        run: npm run build --workspace=@portfolio/api
+
       - name: Typecheck all workspaces
         run: npm run typecheck --workspaces --if-present
 

@@ -11,12 +11,13 @@
   "private": true,
   "scripts": {
     "sync": "tsx src/sync.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
   },
   "type": "module",
   "version": "0.1.0",
   "exports": {
-    ".": "./src/sync.ts",
+    ".": "./dist/sync.js",
     "./package.json": "./package.json"
   }
 }

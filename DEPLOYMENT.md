@@ -36,7 +36,10 @@ context, so webhook background work (sync → AI analysis → draft) survives th
 
 - Framework Preset: **Other**
 - Root Directory: **`apps/api`**
-- Build Command: *(leave empty — serverless functions need no build)*
+- Build Command: **`npm run build --workspace=@portfolio/api`**
+  (compiles the `@portfolio/github-sync` and `@portfolio/ai-agent` workspace
+  packages to `dist/` — Vercel's Node runtime cannot load their `.ts` source
+  from `node_modules`, so the API imports the built JS)
 - Output Directory: *(leave empty)*
 
 **Environment variables** (Project → Settings → Environment Variables):
