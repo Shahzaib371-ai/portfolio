@@ -1,22 +1,98 @@
-export const metadata = {
-  title: "Admin — Shahzaib Hasnain",
-  description: "Portfolio admin dashboard (Phase 4).",
-};
+"use client";
 
-/**
- * Phase 2 placeholder. The real admin dashboard (Phase 4) is a client-side
- * SPA here that talks to the secure API with a Supabase Auth JWT.
- */
+import { useEffect, useState } from "react";
+import AuthGate from "../../components/admin/AuthGate";
+import CrudSection from "../../components/admin/CrudSection";
+import SettingsSection from "../../components/admin/SettingsSection";
+import DraftsSection from "../../components/admin/DraftsSection";
+import { entities } from "../../lib/admin-config";
+import { getSupabase } from "../../lib/supabase";
+
+const tabs = [
+  { id: "overview", label: "Overview" },
+  ...entities.map((e) => ({ id: e.table, label: e.label })),
+  { id: "settings", label: "Settings" },
+  { id: "ai_project_drafts", label: "AI Drafts" },
+];
+
+function Overview() {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const supabase = getSupabase();
+      const out: Record<string, number> = {};
+      for (const e of entities) {
+        const { count } = await supabase.from(e.table).select("*", { count: "exact", head: true });
+        out[e.table] = count ?? 0;
+      }
+      const { count: drafts } = await supabase
+        .from("ai_project_drafts")
+        .select("*", { count: "exact", head: true })
+        .eq("needs_review", true);
+      out["ai_project_drafts"] = drafts ?? 0;
+      setCounts(out);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <p className="text-slate-400">Loading…</p>;
+
+  const cards = [
+    ...entities.map((e) => ({ label: e.label, count: counts[e.table] ?? 0, tab: e.table })),
+    { label: "AI drafts needing review", count: counts["ai_project_drafts"] ?? 0, tab: "ai_project_drafts" },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {cards.map((c) => (
+        <div key={c.tab} className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+          <p className="text-3xl font-bold text-amber-400">{c.count}</p>
+          <p className="mt-1 text-sm text-slate-400">{c.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AdminApp() {
+  const [tab, setTab] = useState("overview");
+  const entity = entities.find((e) => e.table === tab);
+
+  return (
+    <div className="mx-auto max-w-6xl px-5 py-8">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-amber-400">Admin</p>
+      <h1 className="mb-6 text-2xl font-bold text-slate-100">Dashboard</h1>
+
+      <div className="mb-8 flex flex-wrap gap-2">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              tab === t.id
+                ? "bg-amber-400 text-slate-950"
+                : "border border-slate-700 text-slate-300 hover:border-amber-400/60 hover:text-amber-300"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "overview" && <Overview />}
+      {entity && <CrudSection key={entity.table} config={entity} />}
+      {tab === "settings" && <SettingsSection />}
+      {tab === "ai_project_drafts" && <DraftsSection />}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   return (
-    <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-amber-400">Phase 4</p>
-      <h1 className="text-3xl font-bold text-slate-100">Admin dashboard</h1>
-      <p className="mx-auto mt-4 max-w-xl text-slate-400">
-        This is where projects, skills, education, experience, certifications, social links,
-        résumé, and settings will be managed — with a human-approval workflow for AI-detected
-        projects. It arrives in Phase 4, backed by the API (Phase 3).
-      </p>
-    </div>
+    <AuthGate>
+      <AdminApp />
+    </AuthGate>
   );
 }
