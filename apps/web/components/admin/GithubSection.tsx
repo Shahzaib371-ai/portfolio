@@ -23,6 +23,41 @@ function shortSha(sha: string | null): string {
   return sha ? sha.slice(0, 7) : "—";
 }
 
+/** Phase 7: shows the most recent webhook delivery, if any. */
+function WebhookStatus({ logs }: { logs: LogRow[] }) {
+  const last = logs.find((l) => l.kind === "webhook");
+  return (
+    <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-slate-200">Webhook automation</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {last
+              ? `Last delivery: ${last.status} · ${fmtDate(last.created_at)}`
+              : "No webhook deliveries yet — push to a tracked repo after registering the webhook."}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+            !last
+              ? "bg-slate-500/15 text-slate-400"
+              : last.status === "ok"
+                ? "bg-emerald-500/15 text-emerald-300"
+                : "bg-red-500/15 text-red-300"
+          }`}
+        >
+          {!last ? "not configured" : last.status}
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-slate-500">
+        Setup: register <span className="font-mono">POST /api/webhooks/github</span> in the repo's
+        webhook settings (push events, JSON, shared secret). Full guide:{" "}
+        <span className="font-mono">apps/api/WEBHOOKS.md</span>
+      </p>
+    </div>
+  );
+}
+
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString();
@@ -90,6 +125,8 @@ export default function GithubSection() {
 
       {!loading && !error && (
         <>
+          <WebhookStatus logs={logs} />
+
           <div className="overflow-x-auto rounded-xl border border-slate-800">
             <table className="w-full text-left text-sm">
               <thead>

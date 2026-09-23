@@ -1,1 +1,21 @@
-{"dependencies":{"hono":"^4.0.0"},"description":"Secure backend API: admin CRUD, GitHub webhooks, AI agent, visitor chat. Deployed to Vercel serverless.","devDependencies":{"@types/node":"^20.0.0","tsx":"^4.0.0","typescript":"^5.5.0"},"name":"@portfolio/api","private":true,"scripts":{"dev":"tsx watch src/index.ts","typecheck":"tsc --noEmit"},"version":"0.1.0"}
+{
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@portfolio/ai-agent": "^0.1.0",
+    "@portfolio/github-sync": "^0.1.0",
+    "@supabase/supabase-js": "^2.44.0"
+  },
+  "description": "Secure backend API: admin CRUD, GitHub webhooks, AI agent, visitor chat. Deployed to Vercel serverless.",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  },
+  "name": "@portfolio/api",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.1.0"
+}

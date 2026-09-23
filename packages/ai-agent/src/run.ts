@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { fetchRepoContext } from "./github";
 import { GeminiProvider } from "./gemini";
+import { analyzeSingleRepo, type RepoRow } from "./analyzeRepo";
 
 // ---------------------------------------------------------------------------
 // Phase 6 runner: analyze GitHub repos into review drafts.
@@ -18,32 +19,27 @@ import { GeminiProvider } from "./gemini";
 //   DRY_RUN=1 npm run analyze   # fetch contexts only, no LLM calls or writes
 // ---------------------------------------------------------------------------
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // optional; public repos work without it
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DRY_RUN = process.env.DRY_RUN === "1";
-
-for (const [name, value] of [
-  ["GEMINI_API_KEY", GEMINI_API_KEY],
-  ["SUPABASE_URL", SUPABASE_URL],
-  ["SUPABASE_SERVICE_ROLE_KEY", SUPABASE_SERVICE_ROLE_KEY],
-] as const) {
-  if (!value) {
-    console.error(`Missing required env var: ${name}`);
-    process.exit(1);
-  }
-}
-if (!GITHUB_TOKEN) {
-  console.warn("GITHUB_TOKEN not set — using unauthenticated GitHub API (rate-limited, public repos only).");
-}
-
-interface DraftRow {
-  github_repo_id: string | null;
-  payload: { sha?: string } | null;
-}
-
 async function main() {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // optional; public repos work without it
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const DRY_RUN = process.env.DRY_RUN === "1";
+
+  for (const [name, value] of [
+    ["GEMINI_API_KEY", GEMINI_API_KEY],
+    ["SUPABASE_URL", SUPABASE_URL],
+    ["SUPABASE_SERVICE_ROLE_KEY", SUPABASE_SERVICE_ROLE_KEY],
+  ] as const) {
+    if (!value) {
+      console.error(`Missing required env var: ${name}`);
+      process.exit(1);
+    }
+  }
+  if (!GITHUB_TOKEN) {
+    console.warn("GITHUB_TOKEN not set — using unauthenticated GitHub API (rate-limited, public repos only).");
+  }
+
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
   const provider = new GeminiProvider(GEMINI_API_KEY!);
 
@@ -53,93 +49,54 @@ async function main() {
     .order("full_name", { ascending: true });
   if (repoError) throw new Error(`Could not read repos: ${repoError.message}`);
 
-  const { data: drafts, error: draftError } = await supabase
-    .from("ai_project_drafts")
-    .select("github_repo_id,payload");
-  if (draftError) throw new Error(`Could not read drafts: ${draftError.message}`);
-
-  const analyzed = new Set(
-    ((drafts ?? []) as DraftRow[]).map((d) => `${d.github_repo_id}:${d.payload?.sha ?? ""}`)
-  );
-
   let created = 0;
   let skipped = 0;
   let failed = 0;
 
-  for (const repo of repos ?? []) {
-    const key = `${repo.repo_id}:${repo.last_seen_sha ?? ""}`;
-    if (analyzed.has(key)) {
-      console.log(`- ${repo.full_name}: already analyzed for this SHA, skipping.`);
-      skipped += 1;
-      continue;
-    }
-
-    const [owner, name] = (repo.full_name as string).split("/");
-    console.log(`- ${repo.full_name}: fetching context…`);
-    let context;
-    try {
-      context = await fetchRepoContext(owner, name, GITHUB_TOKEN);
-    } catch (err) {
-      failed += 1;
-      console.error(`  ! fetch failed: ${err instanceof Error ? err.message : err}`);
-      continue;
-    }
-    console.log(
-      `  context: readme=${context.readme ? context.readme.length : 0} chars, ` +
-        `langs=[${context.languages.join(",")}], files=${context.fileTree.length}, ` +
-        `keyFiles=${Object.keys(context.keyFiles).length}`
-    );
+  for (const repo of (repos ?? []) as RepoRow[]) {
+    console.log(`- ${repo.full_name}: checking…`);
 
     if (DRY_RUN) {
-      console.log("  DRY_RUN: skipping LLM call and draft insert.");
+      // Fetch contexts only — no LLM calls, no draft writes.
+      try {
+        const [owner, name] = repo.full_name.split("/");
+        const context = await fetchRepoContext(owner, name, GITHUB_TOKEN);
+        console.log(
+          `  DRY_RUN context: readme=${context.readme ? context.readme.length : 0} chars, ` +
+            `langs=[${context.languages.join(",")}], files=${context.fileTree.length}, ` +
+            `keyFiles=${Object.keys(context.keyFiles).length}`
+        );
+      } catch (err) {
+        failed += 1;
+        console.error(`  ! fetch failed: ${err instanceof Error ? err.message : err}`);
+      }
       continue;
     }
 
-    try {
-      const analysis = await provider.analyzeRepository(context);
-      const payload = {
-        ...analysis,
-        sha: repo.last_seen_sha,
-        analyzed_at: new Date().toISOString(),
-        provider: provider.name,
-      };
-      const { data: inserted, error: insertError } = await supabase
-        .from("ai_project_drafts")
-        .insert({
-          github_repo_id: String(repo.repo_id),
-          payload,
-          needs_review: true,
-          reviewed: false,
-        })
-        .select("id")
-        .single();
-      if (insertError) throw new Error(insertError.message);
-
-      await supabase.from("sync_logs").insert({
-        kind: "ai_analysis",
-        status: "ok",
-        message: `Analyzed ${repo.full_name} → draft created (confidence: ${analysis.confidence}).`,
-        details: { repo: repo.full_name, sha: repo.last_seen_sha, draft_id: inserted.id },
-      });
+    const result = await analyzeSingleRepo({ supabase, provider, githubToken: GITHUB_TOKEN, repo });
+    if (result.status === "created") {
       created += 1;
-      console.log(`  draft created (confidence: ${analysis.confidence}).`);
-    } catch (err) {
+      console.log(`  draft created (confidence: ${result.confidence}).`);
+    } else if (result.status === "skipped") {
+      skipped += 1;
+      console.log(`  already analyzed for this SHA, skipping.`);
+    } else {
       failed += 1;
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`  ! analysis failed: ${msg}`);
-      await supabase.from("sync_logs").insert({
-        kind: "ai_analysis",
-        status: "error",
-        message: `Failed to analyze ${repo.full_name}: ${msg}`,
-        details: { repo: repo.full_name },
-      });
+      console.error(`  ! analysis failed: ${result.error}`);
     }
   }
 
   console.log(`\nDone: ${created} drafts created, ${skipped} skipped, ${failed} failed.`);
 }
 
-main().catch((err) => {
-  console.error("Run failed:", err instanceof Error ? err.message : err);
-  process.exit(1);
-});
+// Only run the CLI when this file is executed directly — the webhook
+// handler imports the reusable functions above without side effects.
+import { pathToFileURL } from "node:url";
+const isMainModule =
+  !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMainModule) {
+  main().catch((err) => {
+    console.error("Run failed:", err instanceof Error ? err.message : err);
+    process.exit(1);
+  });
+}
