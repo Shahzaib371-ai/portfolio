@@ -19,14 +19,13 @@ import { GeminiProvider } from "./gemini";
 // ---------------------------------------------------------------------------
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // optional; public repos work without it
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const DRY_RUN = process.env.DRY_RUN === "1";
 
 for (const [name, value] of [
   ["GEMINI_API_KEY", GEMINI_API_KEY],
-  ["GITHUB_TOKEN", GITHUB_TOKEN],
   ["SUPABASE_URL", SUPABASE_URL],
   ["SUPABASE_SERVICE_ROLE_KEY", SUPABASE_SERVICE_ROLE_KEY],
 ] as const) {
@@ -34,6 +33,9 @@ for (const [name, value] of [
     console.error(`Missing required env var: ${name}`);
     process.exit(1);
   }
+}
+if (!GITHUB_TOKEN) {
+  console.warn("GITHUB_TOKEN not set — using unauthenticated GitHub API (rate-limited, public repos only).");
 }
 
 interface DraftRow {
@@ -76,7 +78,7 @@ async function main() {
     console.log(`- ${repo.full_name}: fetching context…`);
     let context;
     try {
-      context = await fetchRepoContext(owner, name, GITHUB_TOKEN!);
+      context = await fetchRepoContext(owner, name, GITHUB_TOKEN);
     } catch (err) {
       failed += 1;
       console.error(`  ! fetch failed: ${err instanceof Error ? err.message : err}`);

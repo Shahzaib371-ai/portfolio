@@ -60,14 +60,13 @@ function truncate(s: string, max: number): string {
   return s.length > max ? s.slice(0, max) + "\n…(truncated)" : s;
 }
 
-async function gh(token: string, path: string): Promise<{ status: number; json: unknown }> {
-  const res = await fetch(`${API}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  });
+async function gh(token: string | undefined, path: string): Promise<{ status: number; json: unknown }> {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API}${path}`, { headers });
   let json: unknown = null;
   try {
     json = await res.json();
@@ -102,7 +101,7 @@ function keepPath(path: string): boolean {
 export async function fetchRepoContext(
   owner: string,
   repo: string,
-  token: string
+  token?: string
 ): Promise<RepoContext> {
   const { status: metaStatus, json: meta } = await gh(token, `/repos/${owner}/${repo}`);
   if (metaStatus !== 200 || typeof meta !== "object" || meta === null) {
