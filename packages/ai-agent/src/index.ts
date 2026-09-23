@@ -29,6 +29,7 @@ export interface RepoContext {
   fullName: string; // owner/repo
   githubUrl: string;
   description: string | null;
+  homepage: string | null; // repo "website" field, may be empty
   readme: string | null; // truncated to a safe length
   languages: string[]; // e.g. ["Python", "C++"]
   keyFiles: Record<string, string>; // path -> truncated content

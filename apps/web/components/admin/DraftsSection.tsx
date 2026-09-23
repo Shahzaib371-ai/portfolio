@@ -59,6 +59,65 @@ export default function DraftsSection() {
     else load();
   }
 
+  function slugify(title: string): string {
+    return (
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 60) || `project-${Date.now()}`
+    );
+  }
+
+  /** Approve a draft: copy it into `projects` as a draft (never published), then mark reviewed. */
+  async function approve(d: Draft) {
+    const p = d.payload as Record<string, unknown> | null;
+    const title = typeof p?.title === "string" && p.title ? p.title : null;
+    if (!title) {
+      alert("Draft has no usable title — cannot approve.");
+      return;
+    }
+    if (!window.confirm(`Create project "${title}" as a DRAFT? It will not be published.`)) return;
+
+    const asString = (v: unknown) => (typeof v === "string" ? v : "");
+    const asArray = (v: unknown) => (Array.isArray(v) ? v.filter((x) => typeof x === "string") : []);
+    const asUrlOrNull = (v: unknown) =>
+      typeof v === "string" && /^https?:\/\//.test(v) ? v : null;
+
+    let slug = slugify(title);
+    const supabase = getSupabase();
+    // Ensure slug uniqueness.
+    const { data: existing } = await supabase.from("projects").select("slug").eq("slug", slug);
+    if (existing && existing.length > 0) slug = `${slug}-${d.id.slice(0, 6)}`;
+
+    const { error: insertError } = await supabase.from("projects").insert({
+      title,
+      slug,
+      description: asString(p?.description) || title,
+      detailed_description: asString(p?.detailedDescription),
+      technologies: asArray(p?.technologies),
+      category: asString(p?.category),
+      github_url: asUrlOrNull(p?.githubUrl),
+      live_url: asUrlOrNull(p?.liveUrl),
+      features: asArray(p?.features),
+      status: "draft",
+      featured: false,
+      ai_generated: true,
+      manually_edited: false,
+      github_repo_id: d.github_repo_id,
+    });
+    if (insertError) {
+      alert(`Could not create project: ${insertError.message}`);
+      return;
+    }
+    await supabase
+      .from("ai_project_drafts")
+      .update({ reviewed: true, needs_review: false, updated_at: new Date().toISOString() })
+      .eq("id", d.id);
+    alert(`"${title}" created as a draft project. Publish it from the Projects tab when ready.`);
+    load();
+  }
+
   return (
     <div>
       <h2 className="mb-1 text-xl font-bold text-slate-100">AI Drafts — review queue</h2>
@@ -103,6 +162,14 @@ export default function DraftsSection() {
                 >
                   {d.reviewed ? "Unmark" : "Mark reviewed"}
                 </button>
+                {!d.reviewed && (
+                  <button
+                    onClick={() => approve(d)}
+                    className="rounded-lg bg-amber-400/15 px-2 py-0.5 text-sm font-medium text-amber-300 hover:bg-amber-400/25"
+                  >
+                    Approve → project
+                  </button>
+                )}
                 <button onClick={() => remove(d)} className="text-sm text-red-400 hover:text-red-300">
                   Delete
                 </button>
