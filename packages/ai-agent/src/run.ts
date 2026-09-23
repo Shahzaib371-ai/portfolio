@@ -17,6 +17,7 @@ import { analyzeSingleRepo, type RepoRow } from "./analyzeRepo";
 //   SUPABASE_SERVICE_ROLE_KEY=... npm run analyze
 //
 //   DRY_RUN=1 npm run analyze   # fetch contexts only, no LLM calls or writes
+//   ANALYZE_REPO=owner/name npm run analyze  # analyze one repo only
 // ---------------------------------------------------------------------------
 
 async function main() {
@@ -25,6 +26,7 @@ async function main() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const DRY_RUN = process.env.DRY_RUN === "1";
+  const ANALYZE_REPO = (process.env.ANALYZE_REPO ?? "").trim(); // owner/name or ""
 
   for (const [name, value] of [
     ["GEMINI_API_KEY", GEMINI_API_KEY],
@@ -43,10 +45,15 @@ async function main() {
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
   const provider = new GeminiProvider(GEMINI_API_KEY!);
 
-  const { data: repos, error: repoError } = await supabase
+  let query = supabase
     .from("github_repositories")
     .select("repo_id,full_name,default_branch,last_seen_sha")
     .order("full_name", { ascending: true });
+  if (ANALYZE_REPO) {
+    console.log(`Filtering to single repo: ${ANALYZE_REPO}`);
+    query = query.eq("full_name", ANALYZE_REPO);
+  }
+  const { data: repos, error: repoError } = await query;
   if (repoError) throw new Error(`Could not read repos: ${repoError.message}`);
 
   let created = 0;

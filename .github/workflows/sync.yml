@@ -1,0 +1,36 @@
+name: Nightly GitHub sync
+
+# Phase 8: keeps `github_repositories` fresh even for repos that don't have
+# the Phase 7 webhook registered (or when a delivery is missed). The sync is
+# idempotent — it only upserts repo metadata, never publishes anything.
+
+on:
+  schedule:
+    # 02:00 UTC daily = 07:00 PKT
+    - cron: "0 2 * * *"
+  workflow_dispatch: # manual run from the Actions tab
+
+permissions:
+  contents: read # least privilege: this job only reads code, never writes
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync GitHub repositories
+        env:
+          GITHUB_USERNAME: Shahzaib371-ai
+          GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }} # optional, read-only
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run sync --workspace=@portfolio/github-sync

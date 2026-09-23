@@ -1,0 +1,45 @@
+name: AI project analysis
+
+# Phase 8: on-demand AI analysis of synced GitHub repos into review drafts.
+# Drafts always land with needs_review=true — NOTHING is auto-published.
+# Defaults to DRY_RUN so an accidental click costs nothing and writes nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (fetch repo contexts only, no LLM calls, no writes)"
+        type: boolean
+        default: true
+      repo:
+        description: "Only analyze one repo (owner/name), empty = all repos"
+        type: string
+        default: ""
+
+permissions:
+  contents: read # least privilege: this job only reads code, never writes
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run AI analysis
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true && '1' || '0' }}
+          ANALYZE_REPO: ${{ inputs.repo }}
+          GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }} # optional, read-only
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.8-flash
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run analyze --workspace=@portfolio/ai-agent

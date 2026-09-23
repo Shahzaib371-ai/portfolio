@@ -37,7 +37,7 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_REQUESTS = 30;
 const hits = new Map<string, number[]>();
 
-function isRateLimited(ip: string): boolean {
+export function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
   recent.push(now);
@@ -45,9 +45,14 @@ function isRateLimited(ip: string): boolean {
   return recent.length > RATE_MAX_REQUESTS;
 }
 
+/** Test-only helper: clears the in-memory rate-limit state. */
+export function clearRateLimitState(): void {
+  hits.clear();
+}
+
 // --- signature verification ------------------------------------------------
 
-function verifySignature(secret: string, rawBody: Buffer, signature: string | null): boolean {
+export function verifySignature(secret: string, rawBody: Buffer, signature: string | null): boolean {
   if (!signature || !signature.startsWith("sha256=")) return false;
   const expected = Buffer.from(
     "sha256=" + createHmac("sha256", secret).update(rawBody).digest("hex")
