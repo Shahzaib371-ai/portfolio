@@ -1,0 +1,1 @@
+{"dependencies":{"drizzle-orm":"^0.33.0"},"description":"Supabase Postgres schema + migrations (Drizzle ORM).","devDependencies":{"drizzle-kit":"^0.24.0","typescript":"^5.5.0"},"name":"@portfolio/db","private":true,"scripts":{"typecheck":"tsc --noEmit"},"version":"0.1.0"}
