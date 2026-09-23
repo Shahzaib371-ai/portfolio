@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { fetchRepoContext } from "./github";
-import type { LLMProvider } from "./index";
+import { fetchRepoContext } from "./github.js";
+import type { LLMProvider } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Single-repo analysis used by both the CLI runner (run.ts) and the

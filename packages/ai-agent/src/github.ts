@@ -1,4 +1,4 @@
-import type { RepoContext } from "./index";
+import type { RepoContext } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // GitHub repository fetcher (Phase 6).

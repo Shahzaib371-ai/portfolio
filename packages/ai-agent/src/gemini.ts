@@ -4,7 +4,7 @@ import {
   type LLMProvider,
   type ProjectAnalysis,
   type RepoContext,
-} from "./index";
+} from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Gemini implementation of the provider-independent LLMProvider contract,

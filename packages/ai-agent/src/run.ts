@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
-import { fetchRepoContext } from "./github";
-import { GeminiProvider } from "./gemini";
-import { analyzeSingleRepo, type RepoRow } from "./analyzeRepo";
+import { fetchRepoContext } from "./github.js";
+import { GeminiProvider } from "./gemini.js";
+import { analyzeSingleRepo, type RepoRow } from "./analyzeRepo.js";
 
 // ---------------------------------------------------------------------------
 // Phase 6 runner: analyze GitHub repos into review drafts.
