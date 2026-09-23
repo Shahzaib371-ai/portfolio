@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthGate from "../../components/admin/AuthGate";
 import CrudSection from "../../components/admin/CrudSection";
+import GithubSection from "../../components/admin/GithubSection";
 import SettingsSection from "../../components/admin/SettingsSection";
 import DraftsSection from "../../components/admin/DraftsSection";
 import { entities } from "../../lib/admin-config";
@@ -12,6 +13,7 @@ const tabs = [
   { id: "overview", label: "Overview" },
   ...entities.map((e) => ({ id: e.table, label: e.label })),
   { id: "settings", label: "Settings" },
+  { id: "github", label: "GitHub" },
   { id: "ai_project_drafts", label: "AI Drafts" },
 ];
 
@@ -84,6 +86,7 @@ function AdminApp() {
       {tab === "overview" && <Overview />}
       {entity && <CrudSection key={entity.table} config={entity} />}
       {tab === "settings" && <SettingsSection />}
+      {tab === "github" && <GithubSection />}
       {tab === "ai_project_drafts" && <DraftsSection />}
     </div>
   );

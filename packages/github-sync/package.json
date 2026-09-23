@@ -1,0 +1,1 @@
+{"dependencies":{"@supabase/supabase-js":"^2.44.0"},"description":"Phase 5: sync GitHub repositories into Supabase (detection source of truth).","devDependencies":{"tsx":"^4.16.0","typescript":"^5.5.0"},"name":"@portfolio/github-sync","private":true,"scripts":{"sync":"tsx src/sync.ts","typecheck":"tsc --noEmit"},"type":"module","version":"0.1.0"}
