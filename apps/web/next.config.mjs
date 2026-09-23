@@ -5,8 +5,11 @@ const nextConfig = {
   output: "export",
   images: { unoptimized: true }, // required for static export
   trailingSlash: true,
-  // If serving from a project subpath (username.github.io/portfolio), set:
-  // basePath: "/portfolio",
+  // When deploying to username.github.io/portfolio, the CI sets
+  // NEXT_BASE_PATH=/portfolio so asset + link paths stay correct.
+  ...(process.env.NEXT_BASE_PATH
+    ? { basePath: process.env.NEXT_BASE_PATH }
+    : {}),
 };
 
 export default nextConfig;
