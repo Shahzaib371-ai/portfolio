@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import githubWebhook from "./webhooks/github";
+import githubWebhook from "./webhooks/github.js";
 
 const app = new Hono();
 

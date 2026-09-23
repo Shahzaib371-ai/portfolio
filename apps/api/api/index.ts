@@ -6,7 +6,7 @@
 // (sync → AI analysis → review draft) keeps running after the 202 response
 // is sent to GitHub, instead of being frozen mid-flight.
 import { waitUntil } from "@vercel/functions";
-import app from "../src/index";
+import app from "../src/index.js";
 
 export const config = {
   // The background AI analysis (GitHub + Gemini calls) can take a while.
