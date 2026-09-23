@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://shahzaib371-ai.github.io/portfolio/sitemap.xml
