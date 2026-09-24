@@ -1,6 +1,10 @@
-import { profile } from "../lib/data";
+"use client";
+
+import { useSiteContent } from "../lib/use-site-content";
 
 export default function Hero() {
+  const { profile } = useSiteContent();
+
   return (
     <div className="hero-grid relative overflow-hidden">
       <div className="relative mx-auto max-w-5xl px-5 pb-20 pt-24 text-center">

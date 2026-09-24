@@ -1,13 +1,12 @@
+"use client";
+
 import Section from "../../components/Section";
 import ProjectCard from "../../components/ProjectCard";
-import { projects } from "../../lib/data";
-
-export const metadata = {
-  title: "Projects — Shahzaib Hasnain",
-  description: "Embedded systems, IoT, machine learning, computer vision, and robotics projects by Shahzaib Hasnain.",
-};
+import { useSiteContent } from "../../lib/use-site-content";
 
 export default function ProjectsPage() {
+  const { projects } = useSiteContent();
+
   return (
     <Section kicker="Portfolio" title="All projects">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -37,10 +37,11 @@ jobs:
           # Project-page URL is username.github.io/portfolio, so assets and
           # links are built under the /portfolio base path.
           NEXT_BASE_PATH: /portfolio
-          # Build-time placeholders; public pages are fully static and make
-          # no network calls during the build.
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          # Real publishable Supabase values (repo secrets). These are public
+          # by design: they ship in the JS bundle so /admin can sign in and
+          # public pages can read published content. RLS guards everything.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build --workspace=@portfolio/web
 
       - name: Deploy to GitHub Pages

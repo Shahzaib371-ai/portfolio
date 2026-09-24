@@ -1,17 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Hero from "../components/Hero";
 import Section from "../components/Section";
 import ProjectCard from "../components/ProjectCard";
-import {
-  profile,
-  featuredProjects,
-  skillGroups,
-  education,
-  experience,
-  socialLinks,
-} from "../lib/data";
+import { useSiteContent } from "../lib/use-site-content";
 
 export default function HomePage() {
+  const { profile, projects, skillGroups, education, experience, socialLinks } =
+    useSiteContent();
+  const featured = projects.filter((p) => p.featured);
+
   return (
     <>
       <Hero />
@@ -28,7 +27,7 @@ export default function HomePage() {
 
       <Section id="featured" kicker="Selected work" title="Featured projects">
         <div className="grid gap-6 md:grid-cols-3">
-          {featuredProjects().map((p) => (
+          {featured.map((p) => (
             <ProjectCard key={p.slug} project={p} />
           ))}
         </div>

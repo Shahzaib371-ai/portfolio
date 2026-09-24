@@ -1,11 +1,10 @@
-import { profile, education, experience, skillGroups, projects } from "../../lib/data";
+"use client";
 
-export const metadata = {
-  title: "Résumé — Shahzaib Hasnain",
-  description: "Résumé of Shahzaib Hasnain: Computer Engineering student, embedded systems, IoT, ML, robotics.",
-};
+import { useSiteContent } from "../../lib/use-site-content";
 
 export default function ResumePage() {
+  const { profile, education, experience, skillGroups, projects } = useSiteContent();
+
   return (
     <div className="mx-auto max-w-3xl px-5 py-16">
       <h1 className="text-4xl font-extrabold tracking-tight text-slate-50">{profile.name}</h1>
@@ -68,7 +67,7 @@ export default function ResumePage() {
       </div>
 
       <p className="mt-12 text-sm text-slate-500">
-        A downloadable PDF résumé and an admin-editable version arrive with Phase 4.
+        This résumé is editable from the admin dashboard — no code changes needed.
       </p>
     </div>
   );
