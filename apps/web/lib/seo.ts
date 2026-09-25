@@ -1,5 +1,8 @@
 "use client";
 
+// Note: the frontend talks to Supabase with the publishable key
+// (sb_publishable_*), baked into the static build via NEXT_PUBLIC_SUPABASE_ANON_KEY.
+
 import { useEffect } from "react";
 import { profile, siteMeta, socialLinks } from "./data";
 
