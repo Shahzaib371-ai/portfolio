@@ -136,11 +136,14 @@ async function fetchSiteContent(): Promise<SiteContent> {
     const settings: Record<string, string> = Object.fromEntries(
       settingsRows.map((r) => [r.key as string, (r.value as string) ?? ""])
     );
+    const photoShape = settings.profile_photo_shape === "rounded" ? "rounded" : "circle";
     const profile: Profile = {
       name: settings.profile_name || fallbackProfile.name,
       tagline: settings.profile_tagline || fallbackProfile.tagline,
       about: parseJsonArray(settings.profile_about, fallbackProfile.about),
       github: settings.profile_github || fallbackProfile.github,
+      photoUrl: settings.profile_photo_url || undefined,
+      photoShape,
     };
 
     return { profile, projects, skillGroups, education, experience, socialLinks };

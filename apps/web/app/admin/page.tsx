@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AuthGate from "../../components/admin/AuthGate";
 import CrudSection from "../../components/admin/CrudSection";
 import GithubSection from "../../components/admin/GithubSection";
+import PhotoSection from "../../components/admin/PhotoSection";
 import SettingsSection from "../../components/admin/SettingsSection";
 import DraftsSection from "../../components/admin/DraftsSection";
 import { entities } from "../../lib/admin-config";
@@ -11,6 +12,7 @@ import { getSupabase } from "../../lib/supabase";
 
 const tabs = [
   { id: "overview", label: "Overview" },
+  { id: "photo", label: "Photo" },
   ...entities.map((e) => ({ id: e.table, label: e.label })),
   { id: "settings", label: "Settings" },
   { id: "github", label: "GitHub" },
@@ -84,6 +86,7 @@ function AdminApp() {
       </div>
 
       {tab === "overview" && <Overview />}
+      {tab === "photo" && <PhotoSection />}
       {entity && <CrudSection key={entity.table} config={entity} />}
       {tab === "settings" && <SettingsSection />}
       {tab === "github" && <GithubSection />}

@@ -48,6 +48,10 @@ export interface Profile {
   tagline: string;
   about: string[];
   github: string;
+  /** Profile photo as a data URL (set from /admin → Photo). Empty = no photo shown. */
+  photoUrl?: string;
+  /** Photo frame shape on the site. Defaults to "circle". */
+  photoShape?: "circle" | "rounded";
 }
 
 export const profile: Profile = {
