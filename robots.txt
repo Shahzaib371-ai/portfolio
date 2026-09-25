@@ -1,4 +1,6 @@
 User-Agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
 
 Sitemap: https://shahzaib371-ai.github.io/portfolio/sitemap.xml
