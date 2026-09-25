@@ -13,7 +13,7 @@ export const personJsonLdString = JSON.stringify({
   "@type": "Person",
   name: profile.name,
   url: siteMeta.baseUrl,
-  image: `${siteMeta.baseUrl}/og-image.png`,
+  image: `${siteMeta.baseUrl}/profile.jpg`,
   jobTitle: "Computer Engineering Student",
   description: siteMeta.description,
   knowsAbout: [
