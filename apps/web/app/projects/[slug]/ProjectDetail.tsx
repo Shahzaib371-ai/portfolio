@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Seo } from "../../../lib/seo";
 import { useSiteContent } from "../../../lib/use-site-content";
 
 export default function ProjectDetail({ slug }: { slug: string }) {
@@ -22,6 +23,12 @@ export default function ProjectDetail({ slug }: { slug: string }) {
   }
 
   return (
+    <>
+      <Seo
+        title={project.title}
+        description={project.tagline}
+        path={`/projects/${project.slug}`}
+      />
     <div className="mx-auto max-w-3xl px-5 py-16">
       <Link href="/projects" className="mb-8 inline-block text-sm text-amber-400 hover:underline">
         ← All projects
@@ -65,5 +72,6 @@ export default function ProjectDetail({ slug }: { slug: string }) {
         )}
       </div>
     </div>
+    </>
   );
 }
