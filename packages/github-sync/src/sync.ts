@@ -12,11 +12,13 @@
 // Phase 8 will run the full sync on a schedule in GitHub Actions.
 //
 // Usage:
-//   GITHUB_TOKEN=... GITHUB_USERNAME=Shahzaib371-ai \
+//   GITHUB_TOKEN=... (optional; without it the sync uses the unauthenticated
+//   GitHub API, which is rate-limited and sees public repos only)
+//   GITHUB_USERNAME=Shahzaib371-ai \
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run sync
 //
-// The token needs only Contents=Read-only + Metadata=Read-only (least
-// privilege). It lives in env / CI secrets — never in frontend code.
+// When a token is used it needs only Contents=Read-only + Metadata=Read-only
+// (least privilege). It lives in env / CI secrets — never in frontend code.
 // ---------------------------------------------------------------------------
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -109,14 +111,18 @@ export async function syncSingleRepo(
   };
 }
 
-async function listRepos(token: string | undefined): Promise<GhRepo[]> {
+async function listRepos(token: string | undefined, username: string): Promise<GhRepo[]> {
   const call = gh(token);
+  // /user/repos needs auth; without a token use the public /users/{user}/repos
+  // endpoint (public repos only — all of this user's repos are public).
+  const path = (page: number) =>
+    token
+      ? `/user/repos?per_page=100&page=${page}&type=owner&sort=pushed`
+      : `/users/${username}/repos?per_page=100&page=${page}&type=owner&sort=pushed`;
   const repos: GhRepo[] = [];
   let page = 1;
   for (;;) {
-    const batch = (await call(
-      `/user/repos?per_page=100&page=${page}&type=owner&sort=pushed`
-    )) as GhRepo[];
+    const batch = (await call(path(page))) as GhRepo[];
     repos.push(...batch);
     if (batch.length < 100) break;
     page += 1;
@@ -143,7 +149,6 @@ async function main() {
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   for (const [name, value] of [
-    ["GITHUB_TOKEN", GITHUB_TOKEN],
     ["GITHUB_USERNAME", GITHUB_USERNAME],
     ["SUPABASE_URL", SUPABASE_URL],
     ["SUPABASE_SERVICE_ROLE_KEY", SUPABASE_SERVICE_ROLE_KEY],
@@ -153,10 +158,15 @@ async function main() {
       process.exit(1);
     }
   }
+  if (!GITHUB_TOKEN) {
+    console.warn(
+      "GITHUB_TOKEN not set — using unauthenticated GitHub API (rate-limited, public repos only)."
+    );
+  }
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-  const repos = (await listRepos(GITHUB_TOKEN!)).filter((r) => !r.fork);
+  const repos = (await listRepos(GITHUB_TOKEN, GITHUB_USERNAME!)).filter((r) => !r.fork);
   console.log(`Found ${repos.length} non-fork repos for ${GITHUB_USERNAME}.`);
 
   const { data: existing, error: readError } = await supabase
