@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSiteContent } from "../lib/use-site-content";
 
 export default function Hero() {
@@ -28,12 +29,12 @@ export default function Hero() {
           {profile.tagline}
         </p>
         <div className="mt-9 flex items-center justify-center gap-4">
-          <a
+          <Link
             href="/projects"
             className="rounded-full bg-amber-400 px-7 py-3 font-semibold text-ink-950 transition hover:bg-amber-300"
           >
             View Projects
-          </a>
+          </Link>
           <a
             href={profile.github}
             target="_blank"
