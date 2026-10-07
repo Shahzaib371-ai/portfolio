@@ -24,7 +24,7 @@ export const personJsonLdString = JSON.stringify({
     "Robotics",
     "Software Development",
   ],
-  sameAs: [profile.github, ...socialLinks.map((s) => s.url)],
+  sameAs: [...new Set([profile.github, ...socialLinks.map((s) => s.url)])],
 });
 
 /** JSON-LD Person schema for rich results / knowledge panel. */
