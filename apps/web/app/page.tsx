@@ -80,8 +80,7 @@ export default function HomePage() {
 
       <Section id="contact" kicker="Say hello" title="Contact">
         <p className="mb-6 max-w-2xl text-slate-300">
-          The fastest way to reach me right now is through GitHub. A contact form and more
-          links arrive with the admin dashboard (Phase 4).
+          The fastest way to reach me right now is WhatsApp or GitHub.
         </p>
         <div className="flex flex-wrap gap-4">
           {socialLinks.map((s) => (

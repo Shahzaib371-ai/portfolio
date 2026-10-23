@@ -132,6 +132,11 @@ async function fetchSiteContent(): Promise<SiteContent> {
         url: r.url as string,
       };
     });
+    for (const fl of fallbackSocialLinks) {
+      if (!socialLinks.some((s) => s.label.toLowerCase() === fl.label.toLowerCase())) {
+        socialLinks.push(fl);
+      }
+    }
 
     const settings: Record<string, string> = Object.fromEntries(
       settingsRows.map((r) => [r.key as string, (r.value as string) ?? ""])
@@ -142,7 +147,7 @@ async function fetchSiteContent(): Promise<SiteContent> {
       tagline: settings.profile_tagline || fallbackProfile.tagline,
       about: parseJsonArray(settings.profile_about, fallbackProfile.about),
       github: settings.profile_github || fallbackProfile.github,
-      photoUrl: settings.profile_photo_url || undefined,
+      photoUrl: settings.profile_photo_url || fallbackProfile.photoUrl,
       photoShape,
     };
 

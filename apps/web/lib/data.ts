@@ -62,6 +62,7 @@ export const profile: Profile = {
     "I like building things end to end: sensing the physical world with hardware, processing it with software, and shipping something people can actually use.",
   ],
   github: "https://github.com/Shahzaib371-ai",
+  photoUrl: "https://shahzaib371-ai.github.io/portfolio/profile.jpg",
 };
 
 export const projects: Project[] = [
@@ -156,6 +157,7 @@ export const experience: ExperienceItem[] = [
 
 export const socialLinks: SocialLink[] = [
   { label: "GitHub", url: "https://github.com/Shahzaib371-ai" },
+  { label: "WhatsApp", url: "https://wa.me/923156994371" },
 ];
 
 export const siteMeta = {
