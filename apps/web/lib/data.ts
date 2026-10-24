@@ -158,6 +158,7 @@ export const experience: ExperienceItem[] = [
 export const socialLinks: SocialLink[] = [
   { label: "GitHub", url: "https://github.com/Shahzaib371-ai" },
   { label: "WhatsApp", url: "https://wa.me/923156994371" },
+  { label: "Instagram", url: "https://instagram.com/theshahzaibhasnain" },
 ];
 
 export const siteMeta = {

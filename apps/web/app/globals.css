@@ -11,34 +11,135 @@ html {
 }
 
 body {
-  @apply bg-ink-950 text-slate-200 antialiased;
+  @apply bg-ink-950 font-sans text-slate-200 antialiased;
 }
 
 ::selection {
-  background: #f59e0b;
-  color: #060b1d;
+  background: #fc9867;
+  color: #131313;
 }
 
-/* Slim dark scrollbar */
+/* Slim charcoal scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #060b1d;
+  background: #131313;
 }
 ::-webkit-scrollbar-thumb {
-  background: #182550;
+  background: #333333;
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f59e0b;
+  background: #fc9867;
 }
 
-/* Subtle grid texture for the hero */
+/* Blueprint grid texture for the hero (engineering drawing feel) */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(245, 158, 11, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(245, 158, 11, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(252, 152, 103, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(252, 152, 103, 0.055) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 40%, transparent 100%);
+}
+
+/* ---------- Animations ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.anim-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.anim-delay-1 {
+  animation-delay: 0.12s;
+}
+.anim-delay-2 {
+  animation-delay: 0.24s;
+}
+.anim-delay-3 {
+  animation-delay: 0.38s;
+}
+.anim-delay-4 {
+  animation-delay: 0.52s;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.anim-pop-in {
+  animation: pop-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.anim-blink {
+  animation: blink 1.1s step-end infinite;
+}
+
+@keyframes boot-bar {
+  from {
+    width: 4%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.boot-bar-fill {
+  animation: boot-bar 1.35s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+}
+
+/* Scroll reveal (driven by components/Reveal.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .anim-fade-up,
+  .anim-pop-in,
+  .anim-blink,
+  .boot-bar-fill {
+    animation: none;
+  }
 }

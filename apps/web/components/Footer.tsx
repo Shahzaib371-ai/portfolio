@@ -1,4 +1,4 @@
-import { profile } from "../lib/data";
+import { profile, socialLinks } from "../lib/data";
 
 export default function Footer() {
   return (
@@ -7,9 +7,19 @@ export default function Footer() {
         <p>
           © {new Date().getFullYear()} {profile.name}. Built with Next.js — static, fast, no trackers.
         </p>
-        <a href={profile.github} target="_blank" rel="noreferrer" className="text-amber-400 hover:underline">
-          github.com/Shahzaib371-ai
-        </a>
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+          {socialLinks.map((s) => (
+            <a
+              key={s.label}
+              href={s.url}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-[13px] text-amber-400 hover:underline"
+            >
+              {s.label.toLowerCase()}
+            </a>
+          ))}
+        </div>
       </div>
     </footer>
   );
